@@ -1,0 +1,101 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+
+interface Factory {
++ getByConfig(AccountConfig)
+}
+
+class PullerFactory {
++ getByConfig(AccountConfig)
+}
+PullerFactory .up.o Factory
+PullerFactory::getByConfig -* PullerBuilder
+
+class PusherFactory {
++ getByConfig(AccountConfig)
+}
+PusherFactory .up.o Factory
+PusherFactory::getByConfig -* PusherBuilder
+
+
+abstract class PullerBuilder {
++ {abstract} buildPullerBySecret(AccountSecret)
++ {abstract} getSource()
+}
+class YuquePullerBuilder extends PullerBuilder {
++ buildPullerBySecret(AccountSecret):YuquePuller
+}
+YuquePullerBuilder::buildPullerBySecret -* YuquePuller
+
+abstract class PusherBuilder {
++ {abstract} buildPusherBySecret(AccountSecret)
++ {abstract} getSource()
+}
+
+class MpWechatPusherBuilder extends PusherBuilder {
++ buildPusherBySecret(AccountSecret):MpWechatPusher
+}
+MpWechatPusherBuilder::buildPusherBySecret -* MpWechatPusher
+
+class GithubPagePusherBuilder extends PusherBuilder {
++ buildPusherBySecret(AccountSecret):GithubPagePusher
+}
+GithubPagePusherBuilder::buildPusherBySecret -* GithubPagePusher
+
+abstract class Puller {
+- secret: AccountSecret
++ {abstract} getDocsList(AccountConfig)
+}
+Puller::secret -right-* AccountSecret
+Puller::getDocsList -down-* AccountConfig
+
+class YuquePuller extends Puller {
++ getDocsList(AccountConfig)
+}
+
+abstract class Pusher {
+- secret: AccountSecret
++ {abstract} pushDocs(List, AccountConfig)
+}
+Pusher::secret -left-* AccountSecret
+Pusher::pushDocs -down--* AccountConfig
+
+class MpWechatPusher extends Pusher {
++ getDocsList(AccountConfig)
+}
+class GithubPagePusher extends Pusher {
++ getDocsList(AccountConfig)
+}
+
+class AccountConfig {
+- pullMask: Integer
+- pushMask: Integer
+getters&setters()
+}
+AccountConfig::pullMask -right-* PullerSource:ordinal()
+AccountConfig::pushMask -left-* PusherSource:ordinal()
+
+class AccountSecret {
+- token: String
+- key: String
+- rsaPublic: String
+- rsaPrivate: String
+getters&setters()
+}
+
+' 内容拉取源
+enum PullerSource {
+YUQUE
+getMask()
+}
+
+' 内容发布源
+enum PusherSource {
+MP_WECHAT
+GITHUB_PAGE
+getMask()
+}
+
+@enduml
